@@ -60,6 +60,11 @@ def print_scan(nmap_report,fileName,iPRange,hostNet):
 
     #Walk through the hosts found
     for host in nmap_report.hosts:
+        #Set the row to be in line with the Correct Address of scanned host
+        for i in range(iPRange):
+            if hostNet+str(i) == host.address:
+                row = i + 2
+                break
         #This is to filter out the IP that do not have a host
         #It should work that if there are any open ports its True and continues or if there was found a MAC address its true
         if host.get_open_ports() or host.mac != '':
@@ -73,12 +78,6 @@ def print_scan(nmap_report,fileName,iPRange,hostNet):
                 tmp_host = ','.join(host.hostnames)
             else:
                 tmp_host = 'None set'
-
-            #Set the row to be in line with the Correct Address of scanned host
-            for i in range(iPRange):
-                if hostNet+str(i) == host.address:
-                    row = i + 2
-                    break
 
             #Add the hostname if one exists
             ws.cell(row=row, column=2, value=tmp_host)
