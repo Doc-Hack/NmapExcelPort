@@ -28,7 +28,8 @@ def print_scan(nmap_report,fileName,iPRange,hostNet):
     print("Starting Nmap {0} ( http://nmap.org ) at {1}".format(
         nmap_report.version,
         nmap_report.started))
-
+    
+    #initialize the Excel Workbook
     wb = Workbook()
     ws = wb.active
     ws.title = "Nmap Scan"
@@ -42,11 +43,13 @@ def print_scan(nmap_report,fileName,iPRange,hostNet):
     ws['H1'] = "Priority/Risk"
     ws['I1'] = "Comments"
 
+    #highlight the top cells
     for j in range(1,10):
         fillColor = PatternFill("solid", fgColor="2672EC")
         cellStyle = ws.cell(row=1, column=j)
         cellStyle.fill = fillColor
-
+    
+    #Write the IP Addresses and highlight the cells in our DHCP range
     for i in range(iPRange):
         ws.cell(row=(i+2), column=1, value=hostNet+str(i))
         if i in range(100, 200):
@@ -55,25 +58,32 @@ def print_scan(nmap_report,fileName,iPRange,hostNet):
                 cellStyle = ws.cell(row=(i+2), column=j)
                 cellStyle.fill = fill
 
+    #Walk through the hosts found
     for host in nmap_report.hosts:
-        if serv.port in host.services or host.mac != '':
+        #This is to filter out the IP that do not have a host
+        #It should work that if there are any open ports its True and continues or if there was found a MAC address its true
+        if host.get_open_ports() or host.mac != '':
             for j in range(1,10):
                 fillColor = PatternFill("solid", fgColor="FFFFFF")
                 cellStyle = ws.cell(row=1, column=j)
                 cellStyle.fill = fillColor
-
+            
+            #If the host has a hostname add it
             if len(host.hostnames):
                 tmp_host = ','.join(host.hostnames)
             else:
                 tmp_host = 'None set'
 
+            #Set the row to be in line with the Correct Address of scanned host
             for i in range(iPRange):
                 if hostNet+str(i) == host.address:
                     row = i + 2
                     break
 
+            #Add the hostname if one exists
             ws.cell(row=row, column=2, value=tmp_host)
             
+            #Creates a list of the open ports and services, then converts to string to be able to track for security
             portList = []
             for serv in host.services:
                 pserv = "{0:>5s}/{1:3s}/{2}".format(
@@ -84,6 +94,7 @@ def print_scan(nmap_report,fileName,iPRange,hostNet):
             portString = ','.join(portList)
             ws.cell(row=row, column=3, value=portString)
 
+            #Adds the OS if it was able to be found
             if len(host.os_class_probabilities()):
                 os = host.os_class_probabilities()
                 osEle = str(os[0])
@@ -93,12 +104,14 @@ def print_scan(nmap_report,fileName,iPRange,hostNet):
             else:
                 ws.cell(row=row, column=4, value="Unable to detect")
 
+            #If the vendor could be determined by the NMAP adds it
             venCheck = host.vendor
             if not venCheck:
                 ws.cell(row=row, column=5, value=str(host.vendor))
             else:
                 ws.cell(row=row, column=5, value="Unable to detect")
             
+            #Uses manuf to find the Manufacturer based upon the MAC
             if host.mac != '':
                 ws.cell(row=row, column=6, value=str(host.mac))
                 macVen = manuf.MacParser()
@@ -107,6 +120,7 @@ def print_scan(nmap_report,fileName,iPRange,hostNet):
                 ws.cell(row=row, column=6, value="No MAC")
                 ws.cell(row=row, column=7, value="No MAC")
 
+        #If there was no Host found on the IP, then it posts that the Address is open and highlights them
         else:
             ws.cell(row=row, column=2, value='Open Addr')
             for j in range(1,10):
@@ -123,6 +137,7 @@ if __name__ == "__main__":
     target = "192.168.10.0/24"
     hostNet = "192.168.10."
     iPRange = 256
+    ##Was working on a way for a user to input an IP range, found it easier to just hard code it for internal use
     # slash = "/"
     # subDet = target.find(slash)
     # if subDet == -1:
