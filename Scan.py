@@ -54,7 +54,7 @@ def print_scan(nmap_report,fileName,iPRange,hostNet):
         ws.cell(row=(i+2), column=1, value=hostNet+str(i))
         if i in range(100, 200):
             fill = PatternFill("solid", fgColor="e0a4ea")
-            for j in range(1,10):
+            for j in range(2,10):
                 cellStyle = ws.cell(row=(i+2), column=j)
                 cellStyle.fill = fill
 
@@ -68,7 +68,7 @@ def print_scan(nmap_report,fileName,iPRange,hostNet):
         #This is to filter out the IP that do not have a host
         #It should work that if there are any open ports its True and continues or if there was found a MAC address its true
         if host.get_open_ports() or host.mac != '':
-            for j in range(1,10):
+            for j in range(2,10):
                 fillColor = PatternFill("solid", fgColor="FFFFFF")
                 cellStyle = ws.cell(row=1, column=j)
                 cellStyle.fill = fillColor
@@ -122,7 +122,7 @@ def print_scan(nmap_report,fileName,iPRange,hostNet):
         #If there was no Host found on the IP, then it posts that the Address is open and highlights them
         else:
             ws.cell(row=row, column=2, value='Open Addr')
-            for j in range(1,10):
+            for j in range(2,10):
                 fillColor = PatternFill("solid", fgColor="AA9CD2")
                 cellStyle = ws.cell(row=1, column=j)
                 cellStyle.fill = fillColor
